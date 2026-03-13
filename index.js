@@ -2,11 +2,16 @@ const express = require('express');
 const fetch = require('node-fetch');
 const app = express();
 
+app.use(express.json());
+
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   next();
 });
+
+app.options('*', (req, res) => res.sendStatus(200));
 
 app.get('/fixtures', async (req, res) => {
   try {
@@ -36,4 +41,14 @@ app.post('/analyze', async (req, res) => {
         max_tokens: 8000,
         messages: [{ role: 'user', content: prompt }]
       })
-    })
+    });
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.listen(process.env.PORT || 3000, () => {
+  console.log('Sunucu calisiyor!');
+});
